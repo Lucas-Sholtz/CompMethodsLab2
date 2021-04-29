@@ -54,35 +54,52 @@ namespace CompMethodsLab2
                 }
                 if (Math.Abs(m[j, j]) < absSum)
                 {
-                    indexes.Add(new Tuple<int, double>(j, absSum- Math.Abs(m[j,j])));
+                    indexes.Add(new Tuple<int, double>(j, absSum));
                 }
             }
             return indexes;
         }
         public static Matrix<double> ModifyToDiagonalyDominant(Matrix<double> m, List<Tuple<int, double>> indexes)
         {
-            foreach(var j in indexes)//для каждой пары индекс и разница
+            foreach(var j in indexes)//для каждой пары индекс и разница добавить 
             {
-                double value = (j.Item2 / (double)(m.RowCount - 1));//вычислить число которое нужно отнять от каждого елемента
-                Console.WriteLine($"Sum = {j.Item2}");
-                Console.WriteLine($"Value = {value}");
-                for(int i = 0;i<m.RowCount;i++)//пройтись по колонке
-                {   
-                    if (i != j.Item1)//и из каждого числа не на диагонали
-                    {
-                        if (Math.Abs(m[i, j.Item1]) <= Math.Abs(value))
-                            m[i, j.Item1] = 0.0;
-                        else
-                        {
-                            if (m[i, j.Item1] < 0.0) //вычесть значение разницы
-                                m[i, j.Item1] += value;
-                            else
-                                m[i, j.Item1] -= value;
-                        }
-                    }
-                }
+                m[j.Item1, j.Item1] += j.Item2;
             }
             return m;
+        }
+        public static List<Matrix<double>> DLUDecomposition(Matrix<double> m)
+        {
+            List<Matrix<double>> matrices = new List<Matrix<double>>();
+            Matrix<double> diagonal = Matrix<double>.Build.DenseIdentity(m.ColumnCount);
+            for(int i= 0; i < m.ColumnCount; i++)
+            {
+                diagonal[i, i] = m[i, i];
+            }
+            Matrix<double> topDown = m - diagonal;
+            Console.WriteLine(diagonal.ToMatrixString());
+            Console.WriteLine(topDown.ToMatrixString());
+            matrices.Add(diagonal);
+            matrices.Add(topDown);
+            return matrices;
+        }
+        public static List<Matrix<double>> LUDecomposition(Matrix<double> m)
+        {
+            List<Matrix<double>> matrices = new List<Matrix<double>>();
+            var l = m.LowerTriangle();
+            var u = m.StrictlyUpperTriangle();
+            matrices.Add(l);
+            matrices.Add(u);
+            return matrices;
+        }
+        public static double CalculateNorm(Matrix<double> m1, Matrix<double> m2)
+        {
+            double delta = 0;
+            for(int i = 0; i < m1.RowCount; i++)
+            {
+                delta += Math.Pow(Math.Abs(m1[i, 0] - m2[i, 0]), 2);
+            }
+            delta = Math.Sqrt(delta);
+            return delta;
         }
     }
 }
